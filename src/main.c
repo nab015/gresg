@@ -35,5 +35,12 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    return write_xml_resources("gresources.xml", opts.files, opts.num_files);
+    int status = write_xml_resources("gresources.xml", opts.files, opts.num_files);
+
+    if(status == 0)
+    {
+        printf("Generating done, make sure to check and modify file if neccesary\n");
+    }
+
+    return status;
 }
