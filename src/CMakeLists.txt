@@ -11,3 +11,6 @@ set(PROG_NAME gresg)
 add_executable(${PROG_NAME} ${PROG_SOURCES})
 target_link_libraries(${PROG_NAME} PUBLIC ${LIBXML2_LIBRARIES})
 target_compile_options(${PROG_NAME} PUBLIC -g)
+
+install(TARGETS ${PROG_NAME}
+    RUNTIME DESTINATION bin)
