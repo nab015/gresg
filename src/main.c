@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "argparse.h"
 #include "writer.h"
@@ -9,6 +10,7 @@ void print_help()
 {
     printf("Usage: gresg [OPTIONS] [FILES]\n\n");
     printf("Options:\n\n");
+    printf("-o, --output         The name of the file to output to\n");
     printf("-h, --help           Display this help message\n");
     printf("-V, --version        Display version info\n");
 }
@@ -35,7 +37,15 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    int status = write_xml_resources("gresources.xml", opts.files, opts.num_files);
+    char *outfile = NULL;
+    int rc = Options_get_output_filename(&opts, &outfile);
+    if(rc == -1)
+    {
+        outfile = malloc(sizeof(char) * 15);
+        strcpy(outfile, "gresources.xml");
+    }
+
+    int status = write_xml_resources(outfile, opts.files, opts.num_files);
 
     if(status == 0)
     {

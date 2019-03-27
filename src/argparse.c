@@ -12,9 +12,29 @@ Options Options_new()
     opts.help_flag = false;
     opts.version_flag = false;
     opts.num_files = 0;
+    opts.output_filename = NULL;
     opts.files = malloc(sizeof(opts.files));
     opts.files[0] = NULL;
     return opts;
+}
+
+void Options_add_output_filename(Options *opts, char *filename)
+{
+    opts->output_filename = malloc(sizeof(char) * (strlen(filename) + 1));
+    strcpy(opts->output_filename, filename);
+}
+
+int Options_get_output_filename(Options *opts, char **buffer)
+{
+    if(opts->output_filename == NULL)
+        return -1;
+
+    if(*buffer != NULL)
+        free(*buffer);
+
+    *buffer = malloc(sizeof(char) * (strlen(opts->output_filename) + 1));
+    strcpy(*buffer, opts->output_filename);
+    return 0;
 }
 
 bool Options_append_filename(Options *opts, char *filename)
@@ -68,8 +88,15 @@ Options parse_cmdline(int argc, char **argv)
 {
     Options opts;
     opts = Options_new();
+    bool skip_next = false;
     for(int a = 1; a < argc; a++)
     {
+        if(skip_next)
+        {
+            skip_next = false;
+            continue;
+        }
+
         if(argv[a][0] == '-')
         {
             if(argv[a][1] == '-')
@@ -85,6 +112,21 @@ Options parse_cmdline(int argc, char **argv)
                 {
                     opts.version_flag = true;
                     continue;
+                }
+
+                else if(!strcmp(longopt, "--output"))
+                {
+                    if(argv[a+1] != NULL)
+                    {
+                        Options_add_output_filename(&opts, argv[a+1]);
+                        skip_next = true;
+                    }
+
+                    else
+                    {
+                        fprintf(stderr, "Option --output requires an argument\n");
+                        exit(1);
+                    }
                 }
                 
                 else if(!strcmp(longopt, "--"))
@@ -103,7 +145,7 @@ Options parse_cmdline(int argc, char **argv)
             else
             {
                 int optlen = strlen(argv[a]);
-                for(int b = 0; b < optlen; b++)
+                for(int b = 1; b < optlen; b++)
                 {
                     char shortopt = argv[a][b];
                     if(shortopt == 'h')
@@ -118,9 +160,24 @@ Options parse_cmdline(int argc, char **argv)
                         continue;
                     }
 
+                    else if(shortopt == 'o')
+                    {
+                        if(argv[a+1] != NULL)
+                        {
+                            Options_add_output_filename(&opts, argv[a+1]);
+                            skip_next = true;
+                        }
+
+                        else
+                        {
+                            fprintf(stderr, "Option -o required an argument\n");
+                            exit(1);
+                        }
+                    }
+
                     else
                     {
-                        fprintf(stderr, "Unkown option '-%c'\n", shortopt);
+                        fprintf(stderr, "Unknown option '-%c'\n", shortopt);
                         fprintf(stderr, "Use --help for help\n");
                         exit(1);
                     }
@@ -135,7 +192,7 @@ Options parse_cmdline(int argc, char **argv)
         }
     }
 
-    if(opts.num_files == 0)
+    if(opts.num_files == 0 && !(opts.help_flag || opts.version_flag))
     {
         fprintf(stderr, "You must specify some files\n");
         exit(1);

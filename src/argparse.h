@@ -9,6 +9,7 @@ typedef struct
     bool version_flag;
     char **files;
     int num_files;
+    char *output_filename;
 } Options;
 
 /* Create a new instance of the Options object */
@@ -30,5 +31,9 @@ bool Options_has_version_flag(Options *opts);
 char *Options_get_filename(Options *opts, bool *has_value);
 
 Options parse_cmdline(int argc, char **argv);
+
+void Options_add_output_filename(Options *opts, char *filename);
+
+int Options_get_output_filename(Options *opts, char **buffer);
 
 #endif /* HAVE_ARGPARSE_H */
