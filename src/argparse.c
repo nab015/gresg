@@ -135,5 +135,11 @@ Options parse_cmdline(int argc, char **argv)
         }
     }
 
+    if(opts.num_files == 0)
+    {
+        fprintf(stderr, "You must specify some files\n");
+        exit(1);
+    }
+
     return opts;
 }
