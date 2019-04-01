@@ -5,7 +5,7 @@
 
 #include "writer.h"
 
-int write_xml_resources(char *filename, char **files, int num_files)
+int write_xml_resources(char *filename, char **files)
 {
     xmlTextWriter *writer;
     int rc;
@@ -51,7 +51,7 @@ int write_xml_resources(char *filename, char **files, int num_files)
         goto failed;
     }
 
-   for(int a = 0; a < num_files; a++)
+   for(int a = 0; files[a] != NULL; a++)
    {
        rc = xmlTextWriterWriteElement(writer, BAD_CAST "file", BAD_CAST files[a]);
        if (rc == -1)
@@ -59,7 +59,7 @@ int write_xml_resources(char *filename, char **files, int num_files)
            fprintf(stderr, "Could not write element for file '%s'\n", files[a]);
            goto failed;
        }
-   } 
+   }
 
    /* rc = xmlTextWriterEndElement(writer); // gresource
    if (rc == -1)
@@ -90,18 +90,3 @@ failed:
     xmlFreeTextWriter(writer);
     return -1;
 }
-
-/* Used for testing */
-/* int main()
-{
-    char *files[] = { "hello.txt", "goodbye.txt" };
-    int num_files = 2;
-    int rc = write_xml_resources("output.xml", files, num_files);
-    if (rc == -1)
-    {
-        fprintf(stderr, "Something went wrong\n");
-        return 1;
-    }
-
-    return 0;
-} */

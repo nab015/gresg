@@ -45,7 +45,7 @@ int main(int argc, char **argv)
         strcpy(outfile, "gresources.xml");
     }
 
-    int status = write_xml_resources(outfile, opts.files, opts.num_files);
+    int status = write_xml_resources(outfile, Options_get_files(&opts));
 
     if(status == 0)
     {

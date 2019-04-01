@@ -4,13 +4,11 @@
 
 #include "argparse.h"
 
-int Options_get_file_index = 0;
-
 Options Options_new()
 {
     Options opts;
-    opts.help_flag = false;
-    opts.version_flag = false;
+    opts.help_flag = 0;
+    opts.version_flag = 0;
     opts.num_files = 0;
     opts.output_filename = NULL;
     opts.files = malloc(sizeof(opts.files));
@@ -24,64 +22,76 @@ void Options_add_output_filename(Options *opts, char *filename)
     strcpy(opts->output_filename, filename);
 }
 
-int Options_get_output_filename(Options *opts, char **buffer)
+int Options_has_output_filename(Options *opts)
 {
-    if(opts->output_filename == NULL)
-        return -1;
-
-    if(*buffer != NULL)
-        free(*buffer);
-
-    *buffer = malloc(sizeof(char) * (strlen(opts->output_filename) + 1));
-    strcpy(*buffer, opts->output_filename);
-    return 0;
+    int rc;
+    if (opts->output_filename != NULL)
+        rc = 1;
+    else
+        rc = 0;
+    return rc;
 }
 
-bool Options_append_filename(Options *opts, char *filename)
+int Options_get_output_filename(Options *opts, char **buffer)
 {
-    char **tmp;
-
-    tmp = realloc(opts->files, sizeof(opts->files) * (opts->num_files + 2));
-    if(tmp == NULL)
+    int rc;
+    if (Options_has_output_filename(opts))
     {
-        fprintf(stderr, "gresg: Error: Couldn't allocate memory\n");
-        return false;
+        rc = 0;
+        if (*buffer != NULL)
+            free(*buffer);
+
+        *buffer = malloc(sizeof(char) * (strlen(opts->output_filename) + 1));
+        strcpy(*buffer, opts->output_filename);
     }
 
-    opts->files = tmp;
-    opts->files[opts->num_files] = malloc(sizeof(char) * (strlen(filename) + 1));
-    strcpy(opts->files[opts->num_files], filename);
-    opts->files[++opts->num_files] = NULL;
-    return true;
+    else
+    {
+        rc = 1;
+    }
+
+    return rc;
+}
+
+int Options_append_filename(Options *opts, char *filename)
+{
+    char **tmp;
+    int rc;
+
+    tmp = realloc(opts->files, sizeof(opts->files) * (opts->num_files + 2));
+    if (tmp == NULL)
+    {
+        fprintf(stderr, "gresg: Error processing files: Couldn't allocate memory\n");
+        rc = 0;
+    }
+
+    else
+    {
+        opts->files = tmp;
+        opts->files[opts->num_files] = malloc(sizeof(char) * (strlen(filename) + 1));
+        strcpy(opts->files[opts->num_files], filename);
+        opts->files[++opts->num_files] = NULL;
+        rc = 1;
+        return rc;
+    }
 }
 
 void Options_cleanup_memory(Options *opts)
 {
-    for(int a = 0; a < opts->num_files; a++)
-    {
+    for (int a = 0; a < opts->num_files; a++)
         free(opts->files[a]);
-    }
 
     free(opts->files);
 }
 
-bool Options_has_help_flag(Options *opts)
+int Options_has_help_flag(Options *opts)
 {
     return opts->help_flag;
 }
 
-bool Options_has_version_flag(Options *opts)
+int Options_has_version_flag(Options *opts)
 {
     return opts->version_flag;
-}
-
-char *Options_get_filename(Options *opts, bool *has_value)
-{
-    if(opts->files[Options_get_file_index] == NULL)
-        *has_value = false;
-    else
-        *has_value = true;
-    return opts->files[Options_get_file_index];
 }
 
 Options parse_cmdline(int argc, char **argv)
@@ -107,7 +117,7 @@ Options parse_cmdline(int argc, char **argv)
                     opts.help_flag = true;
                     continue;
                 }
-                
+
                 else if(!strcmp(longopt, "--version"))
                 {
                     opts.version_flag = true;
@@ -128,7 +138,7 @@ Options parse_cmdline(int argc, char **argv)
                         exit(1);
                     }
                 }
-                
+
                 else if(!strcmp(longopt, "--"))
                 {
                     break;
@@ -199,4 +209,9 @@ Options parse_cmdline(int argc, char **argv)
     }
 
     return opts;
+}
+
+char **Options_get_files(Options *opts)
+{
+    return opts->files;
 }
