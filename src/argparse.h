@@ -3,22 +3,23 @@
 
 #include <stdbool.h>
 
-typedef struct
-{
-    bool help_flag;
-    bool version_flag;
-    char **files;
-    int num_files;
-    char *output_filename;
+typedef struct {
+  bool help_flag;
+  bool version_flag;
+  char **files;
+  int num_files;
+  char *output_filename;
 } Options;
 
 /* Free memory used by an Options object */
 void Options_cleanup_memory(Options *opts);
 
-/* Check if the help flag is set, if it is, this function will return true, otherwise false */
+/* Check if the help flag is set, if it is, this function will return true,
+ * otherwise false */
 int Options_has_help_flag(Options *opts);
 
-/* Check if the version flag is set, if it is, this function will return true, otherwise false */
+/* Check if the version flag is set, if it is, this function will return true,
+ * otherwise false */
 int Options_has_version_flag(Options *opts);
 
 /* Retrieve the output filename placing it in buffer */
